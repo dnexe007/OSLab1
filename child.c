@@ -11,20 +11,15 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-
     char buffer[1024];    
     int childToParent1 = atoi(argv[1]);
 
     while(fgets(buffer, sizeof(buffer), stdin) != NULL){
         
         size_t length = strlen(buffer);
-    
-        if (length > 0 && buffer[length - 1] == '\n') {
-            buffer[length - 1] = '\0';
-        }
 
         if(isupper(buffer[0])){
-            fprintf(stdout, "%s\n", buffer);
+            fprintf(stdout, "%s", buffer);
             dprintf(childToParent1, "Ok\n");
         }
 
