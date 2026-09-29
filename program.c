@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include <unistd.h>
 #include <sys/wait.h>
@@ -56,7 +55,6 @@ void DuplicateTo(int oldFd, int newFd){
 }
 
 int main() {
-
     int outputFileId = OpenFile();
 
     int parentToChild[2];
@@ -102,21 +100,32 @@ int main() {
     char inputBuffer[1024];
     char outputBuffer[1024];
 
-    ssize_t bytesRead;
 
-    while(true){
+    int status = 0;
+    while(1){
         printf("Enter text: ");
-        if(fgets(inputBuffer, sizeof(inputBuffer), stdin) == NULL) break;
 
+        if(fgets(inputBuffer, sizeof(inputBuffer), stdin) == NULL) break;
         if(strcmp(inputBuffer, "/esc\n") == 0) break;
 
-        write(parentToChild[1], inputBuffer, strlen(inputBuffer));
+        dprintf(parentToChild[1], "%s", inputBuffer);
 
-        bytesRead = read(childToParent[0], outputBuffer, sizeof(outputBuffer) - 1);
-        if(bytesRead != 0){
+        ssize_t bytesRead = read(childToParent[0], outputBuffer, sizeof(outputBuffer) - 1);
+
+        if(bytesRead > 0){
             outputBuffer[bytesRead] = '\0';
-            if(strcmp(outputBuffer, "Ok\n") != 0)
-                printf("%s", outputBuffer);
+            if(outputBuffer[0] != '\n')
+                printf("Validation error: %s", outputBuffer);
+        }
+        else if(bytesRead == 0){
+            fprintf(stderr, "Child process finished suddenly\n");
+            status = 1;
+            break;
+        }
+        else{
+            perror("Read from child error");
+            status = 1;
+            break;
         }
     }
 
@@ -125,5 +134,6 @@ int main() {
     close(childToParent[0]);
 
     wait(NULL);
-    return 0;
+
+    return status;
 }

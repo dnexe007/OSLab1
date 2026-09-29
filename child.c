@@ -20,14 +20,20 @@ int main(int argc, char* argv[]){
 
         if(isupper(buffer[0])){
             fprintf(stdout, "%s", buffer);
-            dprintf(childToParent1, "Ok\n");
+            dprintf(childToParent1, "\n");
         }
 
         else{
-            if(buffer[0] == '\0')
-                dprintf(childToParent1, "Error: input is empty\n");
-            else
-                dprintf(childToParent1, "Error: input starts with '%c' - not uppercase\n", buffer[0]);
+            if(buffer[0] == '\n') dprintf(
+                childToParent1,
+                "input is empty\n"
+            );
+            
+            else dprintf(
+                childToParent1,
+                "input starts with '%c' - not uppercase\n",
+                buffer[0]
+            );
         }
     }
     close(childToParent1);
